@@ -1,5 +1,5 @@
 //
-//  AppDelegate.h
+//  TestBedViewController.h
 //  CommonControllers-C08
 //
 //  Created by BobZhang on 16/6/15.
@@ -8,10 +8,5 @@
 
 #import <UIKit/UIKit.h>
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
-
-@property (strong, nonatomic) UIWindow *window;
-
-
+@interface TBVC_01_ImagePicker : UIViewController
 @end
-
