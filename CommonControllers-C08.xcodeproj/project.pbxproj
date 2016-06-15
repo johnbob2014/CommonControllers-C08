@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4B09DD3D1D115D7D00CAD276 /* UIImagePickerController+GM.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B09DD3C1D115D7D00CAD276 /* UIImagePickerController+GM.m */; };
 		4B4A02CB1D10FEFB005683C3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B4A02CA1D10FEFB005683C3 /* main.m */; };
 		4B4A02D61D10FEFB005683C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4B4A02D51D10FEFB005683C3 /* Assets.xcassets */; };
 		4B4A02D91D10FEFB005683C3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4B4A02D71D10FEFB005683C3 /* LaunchScreen.storyboard */; };
@@ -15,6 +16,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4B09DD3B1D115D7D00CAD276 /* UIImagePickerController+GM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImagePickerController+GM.h"; sourceTree = "<group>"; };
+		4B09DD3C1D115D7D00CAD276 /* UIImagePickerController+GM.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImagePickerController+GM.m"; sourceTree = "<group>"; };
 		4B4A02C61D10FEFB005683C3 /* CommonControllers-C08.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "CommonControllers-C08.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B4A02CA1D10FEFB005683C3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		4B4A02D51D10FEFB005683C3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -65,6 +68,8 @@
 				4B4A02CA1D10FEFB005683C3 /* main.m */,
 				4B4A02E11D10FFF8005683C3 /* TestBedViewController.h */,
 				4B4A02E21D10FFF8005683C3 /* TestBedViewController.m */,
+				4B09DD3B1D115D7D00CAD276 /* UIImagePickerController+GM.h */,
+				4B09DD3C1D115D7D00CAD276 /* UIImagePickerController+GM.m */,
 			);
 			path = "CommonControllers-C08";
 			sourceTree = "<group>";
@@ -148,6 +153,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B4A02E31D10FFF8005683C3 /* TestBedViewController.m in Sources */,
+				4B09DD3D1D115D7D00CAD276 /* UIImagePickerController+GM.m in Sources */,
 				4B4A02E71D1105A8005683C3 /* UIView+AutoLayout.m in Sources */,
 				4B4A02CB1D10FEFB005683C3 /* main.m in Sources */,
 			);
@@ -256,6 +262,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = "CommonControllers-C08/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.BobZhang.CommonControllers-C08";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -267,6 +274,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = "CommonControllers-C08/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.BobZhang.CommonControllers-C08";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -292,6 +300,7 @@
 				4B4A02DF1D10FEFB005683C3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

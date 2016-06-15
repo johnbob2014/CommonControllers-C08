@@ -24,7 +24,7 @@
     self.window.tintColor = COOKBOOK_PURPLE_COLOR;
     
 #ifdef TBVC_01
-    TBVC_01_ImagePicker *tbvc = [[TBVC_01_ImagePicker alloc]init];
+    TBVC_01_Pick_Snap_Image *tbvc = [[TBVC_01_Pick_Snap_Image alloc]init];
 #endif
     UINavigationController *rootVC = [[UINavigationController alloc]initWithRootViewController:tbvc];
     
