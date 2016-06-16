@@ -134,12 +134,14 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
 }
 @end
 
-#pragma mark - TBVC_03_Record_PlayBack_Trim_Video
+#pragma mark - TBVC_03_Record_Trim_Save_Play_Video
 
-@interface TBVC_03_Record_PlayBack_Trim_Video ()<UINavigationControllerDelegate,UIImagePickerControllerDelegate,UIPopoverPresentationControllerDelegate>
+@import MediaPlayer;
+
+@interface TBVC_03_Record_Trim_Save_Play_Video ()<UINavigationControllerDelegate,UIImagePickerControllerDelegate,UIPopoverPresentationControllerDelegate>
 @end
 
-@implementation TBVC_03_Record_PlayBack_Trim_Video{
+@implementation TBVC_03_Record_Trim_Save_Play_Video{
     UIPopoverPresentationController *popover;
     NSURL *playbackURL;
 }
@@ -150,6 +152,214 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
     
     if ([UIImagePickerController videoRecordingAvailable])
         self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self  action:@selector(recordVideo)];
+}
+
+- (void)recordVideo{
+    if (popover) return;
+    
+    UIImagePickerController *picker = [UIImagePickerController new];
+    picker.sourceType = UIImagePickerControllerSourceTypeCamera;
+    picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
+    picker.mediaTypes = @[(NSString *)kUTTypeMovie];
+    picker.allowsEditing = YES;
+    picker.delegate = self;
+    
+    [self presentViewController:picker animated:YES completion:nil];
+    NSLog(@"%@",NSStringFromSelector(_cmd));
+}
+
+#pragma mark TBVC_03_Record_Trim_Save_Play_Video - UIImagePickerControllerDelegate
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
+    [self performDismiss];
+    [self trimVideo:info];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
+    [self performDismiss];
+}
+
+- (void)performDismiss{
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+        [self dismissViewControllerAnimated:YES completion:nil];
+    else{
+        // Deal with Pad
+        
+    }
+}
+
+#pragma mark Trim Video
+
+- (void)trimVideo:(NSDictionary<NSString *,id> *)mediaInfo{
+    NSURL *mediaURL = mediaInfo[UIImagePickerControllerMediaURL];
+    NSString *urlPath = mediaURL.path;
+    NSString *extension = urlPath.pathExtension;
+    NSString *base = [urlPath stringByDeletingPathExtension];
+    NSString *newPath = [NSString stringWithFormat:@"%@-trimmed.%@",base,extension];
+    NSLog(@"Trimmed Video Path : %@",newPath);
+    NSURL *fileURL = [NSURL fileURLWithPath:newPath];
+    
+    CGFloat editingStart = [mediaInfo[@"_UIImagePickerControllerVideoEditingStart"] floatValue];
+    CGFloat editingEnd = [mediaInfo[@"_UIImagePickerControllerVideoEditingEnd"] floatValue];
+    CMTime startTime = CMTimeMakeWithSeconds(editingStart, 1);
+    CMTime endTime = CMTimeMakeWithSeconds(editingEnd, 1);
+    CMTimeRange exportRange = CMTimeRangeFromTimeToTime(startTime, endTime);
+    
+    //PHAsset *asset = [[PHAsset fetchAssetsWithALAssetURLs:@[mediaURL] options:nil] firstObject];
+    //PHAssetResource *resource = [PHAssetResource alloc]
+    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:mediaURL options:nil];
+    AVAssetExportSession *session = [AVAssetExportSession exportSessionWithAsset:asset presetName:AVAssetExportPresetMediumQuality];
+    session.outputURL = fileURL;
+    session.outputFileType = AVFileTypeQuickTimeMovie;
+    session.timeRange = exportRange;
+    
+    [session exportAsynchronouslyWithCompletionHandler:^{
+        if (session.status == AVAssetExportSessionStatusCompleted) {
+            [self saveVideo:fileURL];
+        }else if (session.status == AVAssetExportSessionStatusFailed){
+            NSLog(@"AV export session failed");
+        }else{
+             NSLog(@"Export session status: %ld", (long)session.status);
+        }
+    }];
+}
+
+#pragma mark Save Video
+
+- (void)saveVideo:(NSURL *)mediaURL{
+    // check if video is compatible with album and save
+    if (UIVideoAtPathIsCompatibleWithSavedPhotosAlbum(mediaURL.path)) {
+        UISaveVideoAtPathToSavedPhotosAlbum(mediaURL.path, self, @selector(video:didFinishSavingWithError:contextInfo:), NULL);
+    }
+}
+
+- (void)video:(NSString *)videoPath didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo{
+    if (!error) {
+        playbackURL = [NSURL fileURLWithPath:videoPath];
+        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPlay target:self action:@selector(playVideo)];
+    }else{
+        NSLog(@"Error saving video: %@", error.localizedFailureReason);
+    }
+}
+
+#pragma mark Play Video
+
+- (void)playVideo{
+    MPMoviePlayerViewController *player = [[MPMoviePlayerViewController alloc] initWithContentURL:playbackURL];
+    player.moviePlayer.allowsAirPlay = YES;
+    player.moviePlayer.controlStyle = MPMovieControlStyleFullscreen;
+    [self.navigationController presentMoviePlayerViewControllerAnimated:player];
+    
+    [[NSNotificationCenter defaultCenter] addObserverForName:MPMoviePlayerPlaybackDidFinishNotification
+                                                      object:player.moviePlayer
+                                                       queue:[NSOperationQueue mainQueue]
+                                                  usingBlock:^(NSNotification * _Nonnull note) {
+                                                      [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerPlaybackDidFinishNotification object:nil];
+        
+    }];
+    
+    [[NSNotificationCenter defaultCenter] addObserverForName:MPMoviePlayerLoadStateDidChangeNotification object:player.moviePlayer queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
+        if ((player.moviePlayer.loadState & MPMovieLoadStatePlayable) != 0) {
+            [player.moviePlayer performSelector:@selector(play) withObject:nil afterDelay:0.5f];
+        }
+    }];
+}
+
+@end
+
+#pragma mark - TBVC_06_Edit_Video
+
+@interface TBVC_06_Edit_Video ()<UINavigationControllerDelegate,UIImagePickerControllerDelegate,UIPopoverPresentationControllerDelegate,UIVideoEditorControllerDelegate>
+@end
+
+@implementation TBVC_06_Edit_Video{
+    UIPopoverPresentationController *popover;
+    NSURL *mediaURL;
+}
+
+- (void)loadView{
+    self.view = [[UIView alloc] init];
+    self.view.backgroundColor = [UIColor grayColor];
+    
+    self.navigationItem.rightBarButtonItem = BARBUTTON(@"Pick Video", @selector(pickVideo));
+}
+
+#pragma mark Pick Video
+
+- (void)pickVideo{
+    UIImagePickerController *picker = [UIImagePickerController new];
+    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    picker.mediaTypes = @[(NSString *)kUTTypeMovie];
+    picker.delegate = self;
+    
+    [self presentViewController:picker animated:YES completion:nil];
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
+    [self performDismiss];
+    
+    popover = nil;
+    mediaURL = info[UIImagePickerControllerMediaURL];
+    self.navigationItem.rightBarButtonItem = BARBUTTON(@"Edit", @selector(editVideo));
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
+    [self performDismiss];
+}
+
+- (void)performDismiss{
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+        [self dismissViewControllerAnimated:YES completion:nil];
+    else{
+        // Deal with Pad
+        
+    }
+}
+
+#pragma mark Edit Video
+
+- (void)editVideo{
+    if (popover) return;
+    
+    if ([UIVideoEditorController canEditVideoAtPath:mediaURL.path]) {
+        UIVideoEditorController *editor = [UIVideoEditorController new];
+        editor.videoPath = mediaURL.path;
+        editor.delegate = self;
+        [self presentViewController:editor animated:YES completion:nil];
+    }else{
+        NSLog(@"Cannot Edit Video");
+    }
+}
+
+#pragma mark UIVideoEditorController Delegate
+
+- (void)videoEditorController:(UIVideoEditorController *)editor didSaveEditedVideoToPath:(NSString *)editedVideoPath{
+    [self performDismiss];
+    mediaURL = [NSURL fileURLWithPath:editedVideoPath];
+    if (mediaURL){
+        self.navigationItem.leftBarButtonItem = BARBUTTON(@"Save", @selector(saveVideo));
+    }
+    else{
+        self.navigationItem.leftBarButtonItem = nil;
+    }
+}
+
+- (void)videoEditorController:(UIVideoEditorController *)editor didFailWithError:(NSError *)error{
+    [self performDismiss];
+    mediaURL = nil;
+    
+    NSLog(@"Video edit failed: %@", error.localizedFailureReason);
+}
+
+- (void)videoEditorControllerDidCancel:(UIVideoEditorController *)editor{
+    [self performDismiss];
+    mediaURL = nil;
+}
+
+- (void)saveVideo{
+    NSLog(@"See TBVC_03_Record_Trim_Save_Play_Video Demo");
+    self.navigationItem.leftBarButtonItem = nil;
+    self.navigationItem.rightBarButtonItem = BARBUTTON(@"Pick", @selector(pickVideo));
 }
 
 @end

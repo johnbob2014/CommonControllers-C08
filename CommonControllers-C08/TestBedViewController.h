@@ -11,7 +11,7 @@
 @interface TBVC_01_Pick_Snap_Image : UIViewController
 @end
 
-@interface TBVC_03_Record_PlayBack_Trim_Video : UIViewController
+@interface TBVC_03_Record_Trim_Save_Play_Video : UIViewController
 @end
 
 @interface TBVC_06_Edit_Video : UIViewController

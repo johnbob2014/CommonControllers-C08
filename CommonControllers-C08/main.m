@@ -6,7 +6,9 @@
 //  Copyright © 2016年 BobZhang. All rights reserved.
 //
 
-#define TBVC_01
+//#define TBVC_01
+//#define TBVC_03
+#define TBVC_06
 
 #import <UIKit/UIKit.h>
 #import "Utility.h"
@@ -26,6 +28,15 @@
 #ifdef TBVC_01
     TBVC_01_Pick_Snap_Image *tbvc = [[TBVC_01_Pick_Snap_Image alloc]init];
 #endif
+    
+#ifdef TBVC_03
+    TBVC_03_Record_Trim_Save_Play_Video *tbvc = [[TBVC_03_Record_Trim_Save_Play_Video alloc]init];
+#endif
+
+#ifdef TBVC_06
+    TBVC_06_Edit_Video *tbvc = [[TBVC_06_Edit_Video alloc]init];
+#endif
+    
     UINavigationController *rootVC = [[UINavigationController alloc]initWithRootViewController:tbvc];
     
     self.window.rootViewController = rootVC;
