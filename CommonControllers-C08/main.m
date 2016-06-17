@@ -8,7 +8,8 @@
 
 //#define TBVC_01
 //#define TBVC_03
-#define TBVC_06
+//#define TBVC_06
+#define TBVC_07
 
 #import <UIKit/UIKit.h>
 #import "Utility.h"
@@ -35,6 +36,10 @@
 
 #ifdef TBVC_06
     TBVC_06_Edit_Video *tbvc = [[TBVC_06_Edit_Video alloc]init];
+#endif
+    
+#ifdef TBVC_07
+    TBVC_07_Email_Message_SocialPost *tbvc = [[TBVC_07_Email_Message_SocialPost alloc] init];
 #endif
     
     UINavigationController *rootVC = [[UINavigationController alloc]initWithRootViewController:tbvc];

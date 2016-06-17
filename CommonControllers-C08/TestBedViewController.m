@@ -364,3 +364,144 @@ didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
 
 @end
 
+#pragma mark - TBVC_07_Email_Message_SocialPost
+
+@import MessageUI;
+@import Social;
+
+@interface TBVC_07_Email_Message_SocialPost ()<MFMailComposeViewControllerDelegate,MFMessageComposeViewControllerDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate>
+@end
+
+@implementation TBVC_07_Email_Message_SocialPost{
+    UIImageView *imageView;
+    UISegmentedControl *seg;
+}
+
+- (void)loadView{
+    // loadView 中必须对self.view进行初始化！！！！！！
+    self.view = [UIView new];
+    self.edgesForExtendedLayout = UIRectEdgeNone;
+    
+    imageView = [UIImageView newAutoLayoutView];
+    [self.view addSubview:imageView];
+    [imageView autoPinEdgesToSuperviewEdgesWithInsets:UIEdgeInsetsZero];
+    imageView.image = [UIImage imageNamed:@"CoverArt"];
+    
+    seg = [[UISegmentedControl alloc] initWithItems:[@"Email Message SinaWeibo" componentsSeparatedByString:@" "]];
+    self.navigationItem.titleView = seg;
+    
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemReply target:self action:@selector(send)];
+}
+
+- (void)send{
+    switch (seg.selectedSegmentIndex) {
+        case 0:
+            [self sendMail];
+            break;
+        case 1:
+            [self sendMessage];
+            break;
+        case 2:{
+            if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeSinaWeibo]) {
+                [self postSocial:SLServiceTypeSinaWeibo];
+            }
+        }
+            
+            break;
+        default:
+            break;
+    }
+}
+
+#pragma mark Send Mail
+
+- (void)sendMail{
+    MFMailComposeViewController *mcvc = [MFMailComposeViewController new];
+    mcvc.mailComposeDelegate = self;
+    [mcvc setSubject:@"Here’s a great photo!"];
+    NSString *body = @"<h1>Check this out</h1>\
+    <p>I snapped this image from the\
+    <code><b>UIImagePickerController</b></code>.</p>";
+    [mcvc setMessageBody:body isHTML:YES];
+    [mcvc addAttachmentData:UIImagePNGRepresentation(imageView.image) mimeType:@"image/png" fileName:@"haha.png"];
+    
+    [self presentViewController:mcvc animated:YES completion:nil];
+
+}
+
+- (void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error{
+    [self dismissViewControllerAnimated:YES completion:nil];
+    switch (result) {
+        case MFMailComposeResultCancelled:
+            NSLog(@"Mail was cancelled");
+            break;
+        case MFMailComposeResultFailed:
+            NSLog(@"Mail failed");
+            break;
+        case MFMailComposeResultSaved:
+            NSLog(@"Mail was saved");
+            break;
+        case MFMailComposeResultSent:
+            NSLog(@"Mail was sent");
+            break;
+        default:
+            break;
+    }
+}
+
+#pragma mark Send Message
+
+- (void)sendMessage{
+    if ([MFMessageComposeViewController canSendText]) {
+        
+        MFMessageComposeViewController *mcvc = [MFMessageComposeViewController new];
+        mcvc.messageComposeDelegate = self;
+        mcvc.body = @"I'm reading the iOS Developer's Cookbook";
+        if ([MFMessageComposeViewController canSendAttachments]) {
+            [mcvc addAttachmentData:UIImagePNGRepresentation(imageView.image)  typeIdentifier:@"png" filename:@"haha.png"];
+        }
+        
+        [self presentViewController:mcvc animated:YES completion:nil];
+    }
+}
+
+- (void)messageComposeViewController:(MFMessageComposeViewController *)controller didFinishWithResult:(MessageComposeResult)result{
+    [self dismissViewControllerAnimated:YES completion:nil];
+    switch (result) {
+        case MessageComposeResultCancelled:
+            NSLog(@"Message was cancelled");
+            break;
+        case MessageComposeResultFailed:
+            NSLog(@"Message failed");
+            break;
+        case MessageComposeResultSent:
+            NSLog(@"Message was sent");
+            break;
+        default:
+            break;
+    }
+}
+
+#pragma mark Post Social
+
+- (void)postSocial:(NSString *)serviceType{
+    SLComposeViewController *cvc = [SLComposeViewController composeViewControllerForServiceType:serviceType];
+    [cvc addImage:imageView.image];
+    [cvc setInitialText:@"I'm reading the iOS Developer's Cookbook"];
+    cvc.completionHandler = ^(SLComposeViewControllerResult result){
+        switch (result)
+        {
+            case SLComposeViewControllerResultCancelled:
+                NSLog(@"Cancelled");
+                break;
+            case SLComposeViewControllerResultDone:
+                NSLog(@"Posted");
+                break;
+            default:
+                break;
+        }
+    };
+    
+    [self presentViewController:cvc animated:YES completion:nil];
+}
+@end

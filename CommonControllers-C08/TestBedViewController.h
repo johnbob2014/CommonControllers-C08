@@ -16,3 +16,6 @@
 
 @interface TBVC_06_Edit_Video : UIViewController
 @end
+
+@interface TBVC_07_Email_Message_SocialPost : UIViewController
+@end
